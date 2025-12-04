@@ -12,30 +12,24 @@ fn main() -> io::Result<()> {
 
     for line in reader.lines() {
         let line_content = line?;
+    
         let mut chars = line_content.chars();
     
         if let Some(first_char) = chars.next() {    
-            let is_left = if first_char == 'L' { -1 } else { 1 };
+            let is_left = first_char == 'L';
             let num_string = chars.as_str();
             
             match num_string.trim().parse::<i32>() {
                 Ok(num) => {
-                    let to_move = (num) * is_left; // 900
-                    let remainder = to_move % 100;
+                    let to_move = if is_left { -1 * num } else { num };
                     let new_position = (last_position + to_move).rem_euclid(100);
-                    result += num / 100;
-                    if !(last_position == 0) {
-                        if (last_position + remainder) <= 0 {
-                            result += 1;
-                        } else if (last_position + remainder) >= 100 {
-                            result += 1;
-                        }
-                    }
-                    println!("{}, to move {}, remainder {}, last {}, new {}, result {}", line_content, to_move, remainder, last_position, new_position, result);
                     last_position = new_position;
+                    if last_position == 0 {
+                        result += 1;
+                    }
                 },
                 Err(_) => {
-                    println!("Error: Could not parse number from '{}'", num_string);
+                    eprintln!("Error: Could not parse number from '{}'", num_string);
                 }
             }
         } else {
@@ -43,7 +37,6 @@ fn main() -> io::Result<()> {
         }
     }
     println!("final: {}, {}", result, last_position);
-    println!("{}", 68/100);
 
     Ok(())
 }
