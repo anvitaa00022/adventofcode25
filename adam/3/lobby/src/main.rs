@@ -1,15 +1,18 @@
 use std::fs::File;
 use std::io::{self, BufReader, BufRead};
+use std::collections::HashMap;
+use std::cmp;
 
 fn main() -> io::Result<()> {
     let _ = part_one();
     let _ = part_two();
+    let _ = part_two_dp();
 
     Ok(())
 }
 
 fn part_one() -> Result<(), io::Error> {
-    let file_path = "/Users/adityaparekh/Advent/3/lobby/src/input.txt";
+    let file_path = "/Users/adityaparekh/Advent/adam/3/lobby/src/input.txt";
 
     // Open the file
     let file = File::open(file_path)?;
@@ -47,7 +50,7 @@ fn part_one() -> Result<(), io::Error> {
 }
 
 fn part_two() -> Result<(), io::Error> {
-    let file_path = "/Users/adityaparekh/Advent/3/lobby/src/input.txt";
+    let file_path = "/Users/adityaparekh/Advent/adam/3/lobby/src/input.txt";
 
     // Open the file
     let file = File::open(file_path)?;
@@ -108,4 +111,54 @@ fn part_two() -> Result<(), io::Error> {
     println!("total sum {}", total_sum);
 
     Ok(())
+}
+
+fn part_two_dp() -> Result<(), io::Error> {
+    let file_path = "/Users/adityaparekh/Advent/adam/3/lobby/src/input.txt";
+
+    // Open the file
+    let file = File::open(file_path)?;
+
+    // Create a buffered reader for efficient line-by-line reading
+    let reader = BufReader::new(file);
+
+    let mut total_sum: usize = 0;
+
+    // Iterate over the lines in the file
+    for line_result in reader.lines() {
+        // Handle potential errors when reading each line
+        let line = line_result?;
+
+        let mut mem: HashMap<(usize, usize), usize> = HashMap::new();
+
+        total_sum += get_largest(&line, 0, 12, &mut mem);
+    }
+
+    println!("dp {}", total_sum);
+    Ok(())
+}
+
+fn get_largest(
+    s: &String,
+    i: usize,
+    n: usize,
+    mem: &mut HashMap<(usize, usize), usize>
+) -> usize {
+    
+    if n == 0 || i >= s.len() || n > s.len() - i {
+        return 0;
+    }
+
+    if mem.contains_key(&(i,n)) {
+        return mem[&(i,n)];
+    }
+
+    let curr: usize = s.chars().nth(i).expect("REASON").to_digit(10).unwrap().try_into().unwrap();
+    let first: usize = get_largest(s, i+1, n-1, mem) + curr * 10_usize.pow((n-1).try_into().unwrap());
+    let second: usize = get_largest(s, i+1, n, mem);
+
+    let max_num: usize = cmp::max(first, second);
+    mem.insert((i,n), max_num);
+
+    max_num
 }
