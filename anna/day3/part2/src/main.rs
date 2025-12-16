@@ -36,10 +36,7 @@ fn get_max_voltage(
     
     let curr_digit = bank.chars().nth(curr_index).unwrap().to_digit(10).unwrap() as u64;
 
-    // Option 1: pick current digit
     let pick = 10u64.pow((num_digits - 1) as u32) * curr_digit + get_max_voltage(bank, curr_index + 1, num_digits - 1, memo);
-
-    // Option 2: skip current digit
     let skip = get_max_voltage(bank, curr_index + 1, num_digits, memo);
 
     let best = pick.max(skip);
