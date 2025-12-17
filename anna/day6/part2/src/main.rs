@@ -2,57 +2,48 @@ use std::fs;
 
 fn main() {
     let contents = fs::read_to_string(
-        "/Users/anvitaa/git/adventofcode25/anna/day6/input.txt",
+        "/Users/anvitaa/git/adventofcode25/anna/day6/part1/input.txt",
     ).expect("Should have been able to read the file");
 
-    let lines: Vec<&str> = contents.trim().lines().collect();
-    let operators: Vec<&str> = get_operators(&lines.get(lines.len()-1).unwrap());
+    let lines: Vec<&str> = contents.lines().collect();
+    let mut operators: Vec<(usize, char)> = get_operators(&lines.get(lines.len()-1).unwrap());
 
     let rows = lines.len()-1;
-    let cols = operators.len();
-    let mut nums: Vec<Vec<u128>> = Vec::new();
-    for row in 0..rows {
-        nums.push(get_num_row(&lines.get(row).unwrap(), cols));
-    }
-
-    let mut final_sum: u128 = 0;
-    for col in 0..cols {
-        let &curr_opertator = operators.get(col).unwrap();
-        let mut curr_result: u128 = if curr_opertator == "+" {0} else {1};
-        for row in 0..rows {
-            if curr_opertator == "+" {
-                curr_result += nums[row][col];
-            } else if curr_opertator == "*" {
-                curr_result *= nums[row][col];
+    let mut start_col: i32 = (lines[0].len()-1).try_into().unwrap();
+    
+    let mut final_sum = 0;
+    while let Some((end_col, operator)) = operators.pop() {
+        println!("start {}, end {}, op {}", start_col, end_col, operator);
+        let mut curr_result: u128 = if operator == '+' {0} else {1};
+        while start_col >= end_col.try_into().unwrap() {
+            let mut num_string: String = "".to_string();
+            for row in 0..rows {
+                let curr_char = lines[row].chars().nth(start_col as usize).unwrap();
+                println!("got char{}, coord {}{}", curr_char, row, start_col);
+        
+                if curr_char != ' ' {
+                    num_string.push(curr_char);
+                }
             }
+            println!("num_string{}", num_string);
+            let num: u128 = if num_string.trim() == "" {0} else {num_string.parse().unwrap()};
+            println!("num{}", num);
+            if operator == '+' {
+                curr_result += num;
+            } else if operator == '*' {
+                curr_result *= num;
+            }
+            start_col -= 1;
         }
         final_sum += curr_result;
+        start_col -= 1;
     }
-    // println!("{:?}", operators);
-    // println!("{:?}", nums);
     println!("{}", final_sum);
 }
 
-fn get_operators(line: &str) -> Vec<&str> {
-    let mut operators: Vec<&str> = Vec::new();
-    for part in line.split(" ") {
-        if part == "" {
-            continue;
-        }
-        operators.push(&part);
-    }
-    return operators;
-}
-
-fn get_num_row(line: &str, cols: usize) -> Vec<u128> {
-    let mut num_row: Vec<u128>= vec![0; cols];
-    let mut ind: usize = 0;
-    for part in line.split(" ") {
-        if part == "" {
-            continue;
-        }
-        num_row[ind] = part.parse().unwrap();
-        ind += 1;
-    }
-    return num_row;
+fn get_operators(line: &str) -> Vec<(usize, char)> {
+    return line.chars()
+        .enumerate()
+        .filter(|(_, c)| *c != ' ')
+        .collect();
 }
